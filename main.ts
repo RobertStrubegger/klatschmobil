@@ -87,6 +87,8 @@ basic.forever(function () {
         }
     }
     Klatsch = 0
+    // Kursabweichungsberechnung ist noch fehlerhaft
+    // Wenn der Kurs auf 320 steht und die Richtung 10 ist ergibt sich eine Abweichung von +310. Tatsächlich ist es aber -60
     KursAbweichung = Kurs + 1000 - (input.compassHeading() + 1000)
     // Fahrtrichtungskorrektur +90° und kleine nach links oder rechts
     if (45 < Math.abs(KursAbweichung)) {
