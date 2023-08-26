@@ -6,6 +6,7 @@ input.onSound(DetectedSound.Loud, function () {
 input.onButtonPressed(Button.A, function () {
     basic.pause(1000)
     Kurs = input.compassHeading()
+    InFahrt = 1
     MoLiGesch = 3
     MoReGesch = 3
 })
@@ -15,11 +16,13 @@ input.onButtonPressed(Button.AB, function () {
 // Stoppe beide Motoren
 input.onButtonPressed(Button.B, function () {
     Kurs = input.compassHeading()
+    InFahrt = 0
     MoLiGesch = 0
     MoReGesch = 0
 })
 // Stopp bei Hindernis
 input.onGesture(Gesture.ThreeG, function () {
+    InFahrt = 0
     MoLiGesch = 0
     pins.digitalWritePin(DigitalPin.P0, 0)
     MoReGesch = 0
@@ -42,6 +45,7 @@ let KursAbweichung = 0
 let Klatsch = 0
 let MoReGesch = 0
 let MoLiGesch = 0
+let InFahrt = 0
 let Kurs = 0
 basic.showLeds(`
     . . # . .
@@ -53,6 +57,7 @@ basic.showLeds(`
 Kurs = input.compassHeading()
 basic.pause(2000)
 basic.clearScreen()
+InFahrt = 0
 MoLiGesch = 0
 MoReGesch = 0
 basic.forever(function () {
@@ -61,7 +66,7 @@ basic.forever(function () {
         // Wenn beide Motoren still stehen wechsle auf volle Fahrt
         // sonst stoppe beide Motoren
         // 
-        if (MoLiGesch == 0 && MoReGesch == 0) {
+        if (InFahrt == 0) {
             // Motorgeschwindigkeiten (gleich für links und rechts)
             // 3: Volle Kraft voraus
             // 2: Etwas langsamer (zur Kurskorrektur)
@@ -69,12 +74,17 @@ basic.forever(function () {
             // 0: Motor steht
             MoLiGesch = 3
             MoReGesch = 3
+            InFahrt = 1
         } else {
             MoLiGesch = 0
             MoReGesch = 0
+            InFahrt = 0
         }
     } else if (Klatsch == 1) {
         Kurs += 90
+        if (Kurs > 360) {
+            Kurs += -360
+        }
     }
     Klatsch = 0
     KursAbweichung = Kurs + 1000 - (input.compassHeading() + 1000)
@@ -95,7 +105,7 @@ basic.forever(function () {
             MoLiGesch = 3
             MoReGesch = 2
         }
-    } else if (2 < Math.abs(KursAbweichung)) {
+    } else if (2 > Math.abs(KursAbweichung)) {
         MoLiGesch = 3
         MoReGesch = 3
     }
@@ -106,7 +116,7 @@ basic.forever(function () {
     // Berechne wievielter Puls für linken und rechten Motor eine Pause sein soll
     // 
     // Führe 9 Pulse aus
-    if (MoLiGesch == 0 && MoReGesch == 0) {
+    if (InFahrt == 0) {
         pins.digitalWritePin(DigitalPin.P0, 0)
         pins.digitalWritePin(DigitalPin.P1, 0)
         basic.pause(800)
