@@ -111,6 +111,10 @@ basic.forever(function () {
         MoLiGesch = 3
         MoReGesch = 3
     }
+    for (let Index = 0; Index <= MoLiGesch; Index++) {
+        led.plot(0, 4)
+    }
+    led.plot(0, 4)
     // Wenn Zielgeschwindigkeit beider Motoren gleich 0 dann stoppe beide Motoren und warte auf Befehle (per Knopf A oder Doppelklatsch)
     // 
     // ansonsten
