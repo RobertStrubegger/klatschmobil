@@ -56,7 +56,6 @@ basic.showLeds(`
     `)
 Kurs = input.compassHeading()
 basic.pause(2000)
-basic.clearScreen()
 InFahrt = 0
 MoLiGesch = 0
 MoReGesch = 0
@@ -87,9 +86,13 @@ basic.forever(function () {
         }
     }
     Klatsch = 0
-    // Kursabweichungsberechnung ist noch fehlerhaft
-    // Wenn der Kurs auf 320 steht und die Richtung 10 ist ergibt sich eine Abweichung von +310. Tatsächlich ist es aber -60
-    KursAbweichung = Kurs + 1000 - (input.compassHeading() + 1000)
+    KursAbweichung = Kurs - input.compassHeading()
+    if (KursAbweichung > 180) {
+        KursAbweichung += -360
+    }
+    if (KursAbweichung < -180) {
+        KursAbweichung += 360
+    }
     // Fahrtrichtungskorrektur +90° und kleine nach links oder rechts
     if (45 < Math.abs(KursAbweichung)) {
         if (KursAbweichung < 0) {
@@ -111,10 +114,6 @@ basic.forever(function () {
         MoLiGesch = 3
         MoReGesch = 3
     }
-    for (let Index = 0; Index <= MoLiGesch; Index++) {
-        led.plot(0, 4)
-    }
-    led.plot(0, 4)
     // Wenn Zielgeschwindigkeit beider Motoren gleich 0 dann stoppe beide Motoren und warte auf Befehle (per Knopf A oder Doppelklatsch)
     // 
     // ansonsten
@@ -122,11 +121,17 @@ basic.forever(function () {
     // Berechne wievielter Puls für linken und rechten Motor eine Pause sein soll
     // 
     // Führe 9 Pulse aus
-    if (InFahrt == 0) {
-        pins.digitalWritePin(DigitalPin.P0, 0)
-        pins.digitalWritePin(DigitalPin.P1, 0)
-        basic.pause(800)
-    } else {
+    if (InFahrt == 1) {
+        for (let Index = 0; Index <= 4; Index++) {
+            led.unplot(0, Index)
+            led.unplot(4, Index)
+        }
+        for (let Index = 0; Index <= MoLiGesch; Index++) {
+            led.plot(0, 5 - Index)
+        }
+        for (let Index = 0; Index <= MoReGesch; Index++) {
+            led.plot(4, 5 - Index)
+        }
         // Berechne der wievielte Puls eine Pause sein soll
         // Geschwindigkeit = 3 => der 10.Puls (damit nie eine Pause => Volle Fahrt
         // Geschwindigkeit = 2 => der 7. Puls (damit etwas langsamer)
@@ -148,5 +153,13 @@ basic.forever(function () {
             }
             basic.pause(100)
         }
+    } else {
+        pins.digitalWritePin(DigitalPin.P0, 0)
+        pins.digitalWritePin(DigitalPin.P1, 0)
+        for (let Index = 0; Index <= MoReGesch; Index++) {
+            led.unplot(0, 4 - Index)
+            led.unplot(4, 4 - Index)
+        }
+        basic.pause(800)
     }
 })
